@@ -1,0 +1,150 @@
+# ClawHunt #3156 — 会员空间平台 · 基础设施 CI
+#
+# 本单范围（S2-INFRA-014）：只做 CI 流水线本身 + 可验证的测试用 .tf。
+# 不执行 apply，没有回滚。prod 不在 CI 中 plan 或 apply。
+#
+# 第三方 action 全部固定到完整 commit SHA（不用浮动 tag），
+# SHA 由 gh api repos/<owner>/<repo>/git/ref/tags/<tag> 核实：
+#   actions/checkout@v4                  11d5960a326750d5838078e36cf38b85af677262
+#   actions/github-script@v7             f28e40c7f34bde8b3046d885e986cb6290c5673b
+#   hashicorp/setup-terraform@v3         b9cd54a3c349d3f38e8881555d616ced269862dd
+#   terraform-linters/setup-tflint@v4    6e87008f9dd1fe3e34e66aca6c97b4a69f72a7f4
+#
+# plan 评论只含数量与资源地址，不含任何属性值：plan 摘要由
+# scripts/plan_summary.py 从 terraform show -json 的输出里只取
+# resource_changes[].address 与 [].change.actions 生成，脚本内含
+# 秘密模式兜底检查，发现疑似秘密即失败退出、不输出评论。
+
+name: infra-ci
+
+on:
+  pull_request:
+    paths:
+      - "infra/**"
+      - ".github/workflows/infra-ci.yml"
+      - ".tflint.hcl"
+      - ".checkov.yaml"
+      - "checks/**"
+      - "scripts/plan_summary.py"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  fmt:
+    name: terraform fmt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
+        with:
+          terraform_version: "1.17.2"
+      - name: terraform fmt -check
+        run: terraform fmt -check -recursive -diff
+
+  validate:
+    name: terraform validate (${{ matrix.env }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        env: [dev, test, prod]
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
+        with:
+          terraform_version: "1.17.2"
+      - name: terraform init (no backend)
+        working-directory: infra/envs/${{ matrix.env }}
+        run: terraform init -backend=false
+      - name: terraform validate
+        working-directory: infra/envs/${{ matrix.env }}
+        run: terraform validate
+
+  tflint:
+    name: tflint (terraform ruleset)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: terraform-linters/setup-tflint@6e87008f9dd1fe3e34e66aca6c97b4a69f72a7f4 # v4
+        with:
+          tflint_version: v0.66.0
+      # 注意：不存在公开的 alicloud 规则集（见 .tflint.hcl 里的核实记录），
+      # 本步跑内置 terraform 规则集；阿里云相关检查由 validate 与 checkov 覆盖。
+      - name: tflint --init (install plugins per .tflint.hcl)
+        run: tflint --init
+      - name: tflint --recursive
+        run: tflint --recursive --format compact
+
+  checkov:
+    name: checkov security scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: install checkov (pinned, same version as local verification)
+        run: pip install checkov==3.4.7
+      - name: checkov scan
+        # 规则见 .checkov.yaml：只启用与本单相关的高危规则
+        # （OSS 不得公共读写、数据库不得开公网、安全组不得 0.0.0.0/0 入站），
+        # 任一失败即让本步骤失败。
+        run: checkov --config-file .checkov.yaml
+
+  plan:
+    name: terraform plan (dev only) + PR comment
+    runs-on: ubuntu-latest
+    needs: [fmt, validate, tflint, checkov]
+    if: github.event_name == 'pull_request'
+    environment: dev
+    env:
+      ALICLOUD_ACCESS_KEY: ${{ secrets.ALICLOUD_ACCESS_KEY }}
+      ALICLOUD_SECRET_KEY: ${{ secrets.ALICLOUD_SECRET_KEY }}
+      ALICLOUD_REGION: ${{ vars.ALICLOUD_REGION }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
+        with:
+          terraform_version: "1.17.2"
+      # 注意：dev 环境尚未接共享后端，本步用 -backend=false + -refresh=false
+      # 做静态 plan（本地临时 state，不读远端、不写远端）。
+      # 接入 OSS 后端后去掉 -refresh=false；prod 永远不在 CI 里 plan。
+      - name: terraform plan (dev only)
+        working-directory: infra/envs/dev
+        run: |
+          terraform init -backend=false
+          terraform plan -refresh=false -no-color -out=tfplan
+          terraform show -json tfplan > plan.json
+      - name: build plan summary (counts + addresses only, no values)
+        working-directory: infra/envs/dev
+        run: python3 ../../../scripts/plan_summary.py plan.json > plan-summary.md
+      - name: upsert single PR comment
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            const fs = require('fs');
+            const marker = '<!-- infra-plan-summary -->';
+            const body = fs.readFileSync('infra/envs/dev/plan-summary.md', 'utf8');
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              per_page: 100,
+            });
+            const existing = comments.find(c => c.body && c.body.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+              core.info(`updated existing plan comment ${existing.id}`);
+            } else {
+              const { data } = await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+              core.info(`created plan comment ${data.id}`);
+            }

@@ -1,0 +1,21 @@
+== 1. 干净仓库：terraform fmt -check -recursive 应通过 ==
+PASS：干净仓库 fmt 通过
+
+== 2. 故意写坏格式的 .tf：fmt 步骤应失败 ==
+../../../../../../../../../tmp/tmp.r0rZrjzG7p/bad.tf
+--- old/../../../../../../../../../tmp/tmp.r0rZrjzG7p/bad.tf
++++ new/../../../../../../../../../tmp/tmp.r0rZrjzG7p/bad.tf
+@@ -16,8 +16,8 @@
+ }
+ 
+ resource "alicloud_vpc" "main" {
+-vpc_name="member-space-${var.env_name}"
+-cidr_block=var.vpc_cidr
++  vpc_name   = "member-space-${var.env_name}"
++  cidr_block = var.vpc_cidr
+ }
+ 
+ resource "alicloud_vswitch" "main" {
+PASS：写坏格式的文件让 fmt 失败（退出码非 0），验收 1 通过
+
+验收 1 通过。日志：evidence/ac1-fmt.log

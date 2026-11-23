@@ -1,0 +1,29 @@
+# 自定义 checkov 规则：安全组不得有 0.0.0.0/0 入站（任意端口）。
+#
+# 为什么需要自定义：checkov 内置的阿里云规则只拦 22 端口（CKV_ALI_2）
+# 与 3389 端口（CKV_ALI_3）的 0.0.0.0/0 入站；本单验收 2 要求
+# “加入一条 0.0.0.0/0 入站规则时 checkov 步骤失败”，不分端口，
+# 所以补这一条。只针对 type = ingress；出站 0.0.0.0/0 不受影响。
+metadata:
+  id: CKV_CUSTOM_ALI_1
+  name: Ensure security group does not allow 0.0.0.0/0 ingress on any port
+  category: NETWORKING
+  severity: HIGH
+# 通过当且仅当“不是入站”或“来源不是 0.0.0.0/0”二者至少满足其一；
+# 只有 type=ingress 且 cidr_ip=0.0.0.0/0 时两个条件同时不满足，才判 FAILED。
+# （checkov 自定义 YAML 里 and 要求全部条件成立才通过，会把出站规则也判失败，
+#  所以这里必须用 or；出站 0.0.0.0/0 不受影响。）
+definition:
+  or:
+    - cond_type: attribute
+      resource_types:
+        - alicloud_security_group_rule
+      attribute: type
+      operator: not_equals
+      value: ingress
+    - cond_type: attribute
+      resource_types:
+        - alicloud_security_group_rule
+      attribute: cidr_ip
+      operator: not_equals
+      value: "0.0.0.0/0"

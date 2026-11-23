@@ -1,0 +1,17 @@
+# terraform 运行时产物（不进仓）
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfplan
+tfplan
+plan.json
+*.log
+# 例外：evidence/ 下的验收日志就是交付证据，要进仓
+!evidence/*.log
+
+# 本地验证用的 Python venv（checkov 装在这里）
+.venv/
+__pycache__/
+
+# 系统文件
+.DS_Store

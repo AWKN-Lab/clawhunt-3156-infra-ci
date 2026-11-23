@@ -1,0 +1,203 @@
+== 1. 干净 infra：checkov 应通过 ==
+
+       _               _
+   ___| |__   ___  ___| | _______   __
+  / __| '_ \ / _ \/ __| |/ / _ \ \ / /
+ | (__| | | |  __/ (__|   < (_) \ V /
+  \___|_| |_|\___|\___|_|\_\___/ \_/
+
+By Prisma Cloud | version: 3.4.7 
+
+terraform scan results:
+
+Passed checks: 18, Failed checks: 0, Skipped checks: 0
+
+Check: CKV_ALI_2: "Ensure no security groups allow ingress from 0.0.0.0:0 to port 22"
+	PASSED for resource: alicloud_security_group_rule.https_internal
+	File: /envs/dev/main.tf:36-45
+	Guide: https://docs.prismacloud.io/en/enterprise-edition/policy-reference/alibaba-policies/alibaba-networking-policies/ensure-no-alibaba-cloud-security-groups-allow-ingress-from-00000-to-port-22
+Check: CKV_ALI_3: "Ensure no security groups allow ingress from 0.0.0.0:0 to port 3389"
+	PASSED for resource: alicloud_security_group_rule.https_internal
+	File: /envs/dev/main.tf:36-45
+	Guide: https://docs.prismacloud.io/en/enterprise-edition/policy-reference/alibaba-policies/alibaba-networking-policies/ensure-no-alibaba-cloud-security-groups-allow-ingress-from-00000-to-port-3389
+Check: CKV_ALI_9: "Ensure database instance is not public"
+	PASSED for resource: alicloud_db_instance.main
+	File: /envs/dev/main.tf:77-86
+	Guide: https://docs.prismacloud.io/en/enterprise-edition/policy-reference/alibaba-policies/alibaba-general-policies/ensure-alibaba-cloud-database-instance-is-not-public
+Check: CKV_ALI_2: "Ensure no security groups allow ingress from 0.0.0.0:0 to port 22"
+	PASSED for resource: alicloud_security_group_rule.https_internal
+	File: /envs/prod/main.tf:36-45
+	Guide: https://docs.prismacloud.io/en/enterprise-edition/policy-reference/alibaba-policies/alibaba-networking-policies/ensure-no-alibaba-cloud-security-groups-allow-ingress-from-00000-to-port-22
+Check: CKV_ALI_3: "Ensure no security groups allow ingress from 0.0.0.0:0 to port 3389"
+	PASSED for resource: alicloud_security_group_rule.https_internal
+	File: /envs/prod/main.tf:36-45
+	Guide: https://docs.prismacloud.io/en/enterprise-edition/policy-reference/alibaba-policies/alibaba-networking-policies/ensure-no-alibaba-cloud-security-groups-allow-ingress-from-00000-to-port-3389
+Check: CKV_ALI_9: "Ensure database instance is not public"
+	PASSED for resource: alicloud_db_instance.main
+	File: /envs/prod/main.tf:77-86
+	Guide: https://docs.prismacloud.io/en/enterprise-edition/policy-reference/alibaba-policies/alibaba-general-policies/ensure-alibaba-cloud-database-instance-is-not-public
+Check: CKV_ALI_2: "Ensure no security groups allow ingress from 0.0.0.0:0 to port 22"
+	PASSED for resource: alicloud_security_group_rule.https_internal
+	File: /envs/test/main.tf:36-45
+	Guide: https://docs.prismacloud.io/en/enterprise-edition/policy-reference/alibaba-policies/alibaba-networking-policies/ensure-no-alibaba-cloud-security-groups-allow-ingress-from-00000-to-port-22
+Check: CKV_ALI_3: "Ensure no security groups allow ingress from 0.0.0.0:0 to port 3389"
+	PASSED for resource: alicloud_security_group_rule.https_internal
+	File: /envs/test/main.tf:36-45
+	Guide: https://docs.prismacloud.io/en/enterprise-edition/policy-reference/alibaba-policies/alibaba-networking-policies/ensure-no-alibaba-cloud-security-groups-allow-ingress-from-00000-to-port-3389
+Check: CKV_ALI_9: "Ensure database instance is not public"
+	PASSED for resource: alicloud_db_instance.main
+	File: /envs/test/main.tf:77-86
+	Guide: https://docs.prismacloud.io/en/enterprise-edition/policy-reference/alibaba-policies/alibaba-general-policies/ensure-alibaba-cloud-database-instance-is-not-public
+Check: CKV_CUSTOM_ALI_1: "Ensure security group does not allow 0.0.0.0/0 ingress on any port"
+	PASSED for resource: alicloud_security_group_rule.https_internal
+	Severity: HIGH
+	File: /envs/dev/main.tf:36-45
+Check: CKV_CUSTOM_ALI_1: "Ensure security group does not allow 0.0.0.0/0 ingress on any port"
+	PASSED for resource: alicloud_security_group_rule.egress_any
+	Severity: HIGH
+	File: /envs/dev/main.tf:47-56
+Check: CKV_CUSTOM_ALI_1: "Ensure security group does not allow 0.0.0.0/0 ingress on any port"
+	PASSED for resource: alicloud_security_group_rule.https_internal
+	Severity: HIGH
+	File: /envs/prod/main.tf:36-45
+Check: CKV_CUSTOM_ALI_1: "Ensure security group does not allow 0.0.0.0/0 ingress on any port"
+	PASSED for resource: alicloud_security_group_rule.egress_any
+	Severity: HIGH
+	File: /envs/prod/main.tf:47-56
+Check: CKV_CUSTOM_ALI_1: "Ensure security group does not allow 0.0.0.0/0 ingress on any port"
+	PASSED for resource: alicloud_security_group_rule.https_internal
+	Severity: HIGH
+	File: /envs/test/main.tf:36-45
+Check: CKV_CUSTOM_ALI_1: "Ensure security group does not allow 0.0.0.0/0 ingress on any port"
+	PASSED for resource: alicloud_security_group_rule.egress_any
+	Severity: HIGH
+	File: /envs/test/main.tf:47-56
+Check: CKV_ALI_1: "Alibaba Cloud OSS bucket accessible to public"
+	PASSED for resource: alicloud_oss_bucket.data
+	File: /envs/dev/main.tf:58-64
+	Guide: https://docs.prismacloud.io/en/enterprise-edition/policy-reference/alibaba-policies/alibaba-general-policies/ensure-alibaba-cloud-oss-bucket-is-not-accessible-to-public
+Check: CKV_ALI_1: "Alibaba Cloud OSS bucket accessible to public"
+	PASSED for resource: alicloud_oss_bucket.data
+	File: /envs/prod/main.tf:58-64
+	Guide: https://docs.prismacloud.io/en/enterprise-edition/policy-reference/alibaba-policies/alibaba-general-policies/ensure-alibaba-cloud-oss-bucket-is-not-accessible-to-public
+Check: CKV_ALI_1: "Alibaba Cloud OSS bucket accessible to public"
+	PASSED for resource: alicloud_oss_bucket.data
+	File: /envs/test/main.tf:58-64
+	Guide: https://docs.prismacloud.io/en/enterprise-edition/policy-reference/alibaba-policies/alibaba-general-policies/ensure-alibaba-cloud-oss-bucket-is-not-accessible-to-public
+
+PASS：干净 infra checkov 通过（出站 0.0.0.0/0 未误报）
+
+== 2. 追加 0.0.0.0/0 入站规则：checkov 应失败 ==
+
+       _               _
+   ___| |__   ___  ___| | _______   __
+  / __| '_ \ / _ \/ __| |/ / _ \ \ / /
+ | (__| | | |  __/ (__|   < (_) \ V /
+  \___|_| |_|\___|\___|_|\_\___/ \_/
+
+By Prisma Cloud | version: 3.4.7 
+
+terraform scan results:
+
+Passed checks: 21, Failed checks: 3, Skipped checks: 0
+
+Check: CKV_ALI_2: "Ensure no security groups allow ingress from 0.0.0.0:0 to port 22"
+	PASSED for resource: alicloud_security_group_rule.https_internal
+	File: /envs/dev/main.tf:36-45
+	Guide: https://docs.prismacloud.io/en/enterprise-edition/policy-reference/alibaba-policies/alibaba-networking-policies/ensure-no-alibaba-cloud-security-groups-allow-ingress-from-00000-to-port-22
+Check: CKV_ALI_3: "Ensure no security groups allow ingress from 0.0.0.0:0 to port 3389"
+	PASSED for resource: alicloud_security_group_rule.https_internal
+	File: /envs/dev/main.tf:36-45
+	Guide: https://docs.prismacloud.io/en/enterprise-edition/policy-reference/alibaba-policies/alibaba-networking-policies/ensure-no-alibaba-cloud-security-groups-allow-ingress-from-00000-to-port-3389
+Check: CKV_ALI_9: "Ensure database instance is not public"
+	PASSED for resource: alicloud_db_instance.main
+	File: /envs/dev/main.tf:77-86
+	Guide: https://docs.prismacloud.io/en/enterprise-edition/policy-reference/alibaba-policies/alibaba-general-policies/ensure-alibaba-cloud-database-instance-is-not-public
+Check: CKV_ALI_2: "Ensure no security groups allow ingress from 0.0.0.0:0 to port 22"
+	PASSED for resource: alicloud_security_group_rule.bad_open_https
+	File: /envs/dev/main.tf:89-98
+	Guide: https://docs.prismacloud.io/en/enterprise-edition/policy-reference/alibaba-policies/alibaba-networking-policies/ensure-no-alibaba-cloud-security-groups-allow-ingress-from-00000-to-port-22
+Check: CKV_ALI_3: "Ensure no security groups allow ingress from 0.0.0.0:0 to port 3389"
+	PASSED for resource: alicloud_security_group_rule.bad_open_https
+	File: /envs/dev/main.tf:89-98
+	Guide: https://docs.prismacloud.io/en/enterprise-edition/policy-reference/alibaba-policies/alibaba-networking-policies/ensure-no-alibaba-cloud-security-groups-allow-ingress-from-00000-to-port-3389
+Check: CKV_ALI_3: "Ensure no security groups allow ingress from 0.0.0.0:0 to port 3389"
+	PASSED for resource: alicloud_security_group_rule.bad_open_ssh
+	File: /envs/dev/main.tf:100-109
+	Guide: https://docs.prismacloud.io/en/enterprise-edition/policy-reference/alibaba-policies/alibaba-networking-policies/ensure-no-alibaba-cloud-security-groups-allow-ingress-from-00000-to-port-3389
+Check: CKV_ALI_2: "Ensure no security groups allow ingress from 0.0.0.0:0 to port 22"
+	PASSED for resource: alicloud_security_group_rule.https_internal
+	File: /envs/prod/main.tf:36-45
+	Guide: https://docs.prismacloud.io/en/enterprise-edition/policy-reference/alibaba-policies/alibaba-networking-policies/ensure-no-alibaba-cloud-security-groups-allow-ingress-from-00000-to-port-22
+Check: CKV_ALI_3: "Ensure no security groups allow ingress from 0.0.0.0:0 to port 3389"
+	PASSED for resource: alicloud_security_group_rule.https_internal
+	File: /envs/prod/main.tf:36-45
+	Guide: https://docs.prismacloud.io/en/enterprise-edition/policy-reference/alibaba-policies/alibaba-networking-policies/ensure-no-alibaba-cloud-security-groups-allow-ingress-from-00000-to-port-3389
+Check: CKV_ALI_9: "Ensure database instance is not public"
+	PASSED for resource: alicloud_db_instance.main
+	File: /envs/prod/main.tf:77-86
+	Guide: https://docs.prismacloud.io/en/enterprise-edition/policy-reference/alibaba-policies/alibaba-general-policies/ensure-alibaba-cloud-database-instance-is-not-public
+Check: CKV_ALI_2: "Ensure no security groups allow ingress from 0.0.0.0:0 to port 22"
+	PASSED for resource: alicloud_security_group_rule.https_internal
+	File: /envs/test/main.tf:36-45
+	Guide: https://docs.prismacloud.io/en/enterprise-edition/policy-reference/alibaba-policies/alibaba-networking-policies/ensure-no-alibaba-cloud-security-groups-allow-ingress-from-00000-to-port-22
+Check: CKV_ALI_3: "Ensure no security groups allow ingress from 0.0.0.0:0 to port 3389"
+	PASSED for resource: alicloud_security_group_rule.https_internal
+	File: /envs/test/main.tf:36-45
+	Guide: https://docs.prismacloud.io/en/enterprise-edition/policy-reference/alibaba-policies/alibaba-networking-policies/ensure-no-alibaba-cloud-security-groups-allow-ingress-from-00000-to-port-3389
+Check: CKV_ALI_9: "Ensure database instance is not public"
+	PASSED for resource: alicloud_db_instance.main
+	File: /envs/test/main.tf:77-86
+	Guide: https://docs.prismacloud.io/en/enterprise-edition/policy-reference/alibaba-policies/alibaba-general-policies/ensure-alibaba-cloud-database-instance-is-not-public
+Check: CKV_CUSTOM_ALI_1: "Ensure security group does not allow 0.0.0.0/0 ingress on any port"
+	PASSED for resource: alicloud_security_group_rule.https_internal
+	Severity: HIGH
+	File: /envs/dev/main.tf:36-45
+Check: CKV_CUSTOM_ALI_1: "Ensure security group does not allow 0.0.0.0/0 ingress on any port"
+	PASSED for resource: alicloud_security_group_rule.egress_any
+	Severity: HIGH
+	File: /envs/dev/main.tf:47-56
+Check: CKV_CUSTOM_ALI_1: "Ensure security group does not allow 0.0.0.0/0 ingress on any port"
+	PASSED for resource: alicloud_security_group_rule.https_internal
+	Severity: HIGH
+	File: /envs/prod/main.tf:36-45
+Check: CKV_CUSTOM_ALI_1: "Ensure security group does not allow 0.0.0.0/0 ingress on any port"
+	PASSED for resource: alicloud_security_group_rule.egress_any
+	Severity: HIGH
+	File: /envs/prod/main.tf:47-56
+Check: CKV_CUSTOM_ALI_1: "Ensure security group does not allow 0.0.0.0/0 ingress on any port"
+	PASSED for resource: alicloud_security_group_rule.https_internal
+	Severity: HIGH
+	File: /envs/test/main.tf:36-45
+Check: CKV_CUSTOM_ALI_1: "Ensure security group does not allow 0.0.0.0/0 ingress on any port"
+	PASSED for resource: alicloud_security_group_rule.egress_any
+	Severity: HIGH
+	File: /envs/test/main.tf:47-56
+Check: CKV_ALI_1: "Alibaba Cloud OSS bucket accessible to public"
+	PASSED for resource: alicloud_oss_bucket.data
+	File: /envs/dev/main.tf:58-64
+	Guide: https://docs.prismacloud.io/en/enterprise-edition/policy-reference/alibaba-policies/alibaba-general-policies/ensure-alibaba-cloud-oss-bucket-is-not-accessible-to-public
+Check: CKV_ALI_1: "Alibaba Cloud OSS bucket accessible to public"
+	PASSED for resource: alicloud_oss_bucket.data
+	File: /envs/prod/main.tf:58-64
+	Guide: https://docs.prismacloud.io/en/enterprise-edition/policy-reference/alibaba-policies/alibaba-general-policies/ensure-alibaba-cloud-oss-bucket-is-not-accessible-to-public
+Check: CKV_ALI_1: "Alibaba Cloud OSS bucket accessible to public"
+	PASSED for resource: alicloud_oss_bucket.data
+	File: /envs/test/main.tf:58-64
+	Guide: https://docs.prismacloud.io/en/enterprise-edition/policy-reference/alibaba-policies/alibaba-general-policies/ensure-alibaba-cloud-oss-bucket-is-not-accessible-to-public
+Check: CKV_ALI_2: "Ensure no security groups allow ingress from 0.0.0.0:0 to port 22"
+	FAILED for resource: alicloud_security_group_rule.bad_open_ssh
+	File: /envs/dev/main.tf:100-109
+	Guide: https://docs.prismacloud.io/en/enterprise-edition/policy-reference/alibaba-policies/alibaba-networking-policies/ensure-no-alibaba-cloud-security-groups-allow-ingress-from-00000-to-port-22
+Check: CKV_CUSTOM_ALI_1: "Ensure security group does not allow 0.0.0.0/0 ingress on any port"
+	FAILED for resource: alicloud_security_group_rule.bad_open_https
+	Severity: HIGH
+	File: /envs/dev/main.tf:89-98
+Check: CKV_CUSTOM_ALI_1: "Ensure security group does not allow 0.0.0.0/0 ingress on any port"
+	FAILED for resource: alicloud_security_group_rule.bad_open_ssh
+	Severity: HIGH
+	File: /envs/dev/main.tf:100-109
+
+PASS：加了 0.0.0.0/0 入站规则 checkov 失败（退出码非 0），验收 2 通过
+
+验收 2 通过。日志：evidence/ac2-checkov.log；截图：evidence/ac2-checkov-fail.png

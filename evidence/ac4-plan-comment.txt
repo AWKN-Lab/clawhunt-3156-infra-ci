@@ -1,0 +1,26 @@
+<!-- infra-plan-summary -->
+## Terraform Plan 摘要（dev 环境）
+
+本评论只含数量与资源地址，**不含任何属性值、密码、密钥或连接串**。
+
+| 动作 | 数量 |
+| --- | ---: |
+| 新增 | 3 |
+| 修改 | 1 |
+| 无变化 | 1 |
+
+合计资源：5 个
+
+### 新增（3）
+
+- `alicloud_db_instance.main`
+- `alicloud_oss_bucket.data`
+- `alicloud_vpc.main`
+
+### 修改（1）
+
+- `alicloud_security_group_rule.https_internal`
+
+### 无变化（1）
+
+- `alicloud_vswitch.main`

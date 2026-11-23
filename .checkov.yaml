@@ -1,0 +1,27 @@
+# checkov 配置：只启用与本单验收相关的规则（高危项失败即整个步骤失败）。
+#
+# 覆盖要求（本单原文）与规则映射：
+#   对象存储不得公共读写        -> CKV_ALI_1  （内置，OSS bucket 对公众可访问）
+#   数据库不得开公网连接        -> CKV_ALI_9  （内置，RDS security_ips 含 0.0.0.0/0）
+#   安全组不得有 0.0.0.0/0 入站 -> CKV_ALI_2  （内置，22 端口）
+#                               -> CKV_ALI_3  （内置，3389 端口）
+#                               -> CKV_CUSTOM_ALI_1（自定义，见 checks/：
+#                                  内置规则只覆盖 22/3389 两个端口，
+#                                  任意端口的 0.0.0.0/0 入站都必须拦，
+#                                  所以补一条自定义规则）
+#
+# 其他加固类规则（OSS CMK 加密、版本ing、RDS SSL/TDE 等）不在本单范围，
+# 不启用；需要时再往 check 列表里加，不要默默放宽。
+framework:
+  - terraform
+directory:
+  - infra
+check:
+  - CKV_ALI_1
+  - CKV_ALI_2
+  - CKV_ALI_3
+  - CKV_ALI_9
+  - CKV_CUSTOM_ALI_1
+external-checks-dir:
+  - checks
+compact: true
