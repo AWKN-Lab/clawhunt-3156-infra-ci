@@ -84,3 +84,5 @@ resource "alicloud_db_instance" "main" {
   vswitch_id           = alicloud_vswitch.main.id
   security_ips         = ["10.0.0.0/8"]
 }
+
+# CI smoke test: no-op comment change to trigger infra-ci on a PR
