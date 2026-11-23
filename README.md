@@ -64,8 +64,10 @@ prod 不在 CI 里 plan 或 apply。**
   做静态 plan（本地临时 state，不读远端、不写远端）；接入 OSS 后端后
   去掉 `-refresh=false` 即可。plan 需要 `dev` 环境里配好
   `ALICLOUD_ACCESS_KEY` / `ALICLOUD_SECRET_KEY`（最小权限 RAM 子账号，
-  只读 + plan 所需权限）与 `ALICLOUD_REGION`；没配时 plan 作业失败，
-  这是预期行为，不是静默跳过。
+  只读 + plan 所需权限）与 `ALICLOUD_REGION`；没配时 plan 作业在
+  plan 之前就快速失败并报错，不会静默跳过，也不会让 provider 在
+  元数据地址上长时间重试挂起（冒烟实测：无此检查时 plan 步骤卡住
+  7 分钟以上未返回，见 `evidence/ci-smoke-pr.md`）。
 
 ## 本地验证（2026-11-24 本机实测，工具版本见下）
 
@@ -82,7 +84,7 @@ tflint --init && tflint --recursive --format compact
 | --- | --- | --- |
 | 1. 格式不规范的 .tf 让 fmt 失败 | 通过：干净仓库 `fmt -check` 通过；故意写坏缩进的文件让 fmt 失败（退出码非 0） | `evidence/ac1-fmt.log` |
 | 2. 加 0.0.0.0/0 入站规则让 checkov 失败 | 通过：干净配置 18 项全过；追加 443 + 22 两条 0.0.0.0/0 入站后 3 项失败（CKV_CUSTOM_ALI_1 ×2、CKV_ALI_2 ×1），退出码非 0；其中 443 那条只有自定义规则能拦住 | `evidence/ac2-checkov.log`、`evidence/ac2-checkov-fail.png` |
-| 3. PR 只有一条 plan 评论，新推送更新不新增 | 通过：同一测试 issue 连发两次不同正文，带 marker 的评论始终 1 条，正文为第 2 版 | `evidence/ac3-comment.log`（待跑，见下文） |
+| 3. PR 只有一条 plan 评论，新推送更新不新增 | 通过：同一测试 issue（#1）连发两次不同正文，带 marker 的评论始终 1 条（id 7113331291），正文为第 2 版 | `evidence/ac3-comment.log` |
 | 4. plan 评论不出现密码、密钥、连接串 | 通过：含假密码与假连接串的 plan 夹具生成的评论只有数量与地址，假秘密均未出现 | `evidence/ac4-no-secrets.log`、`evidence/ac4-plan-comment.txt` |
 | 附加：validate 三环境 | 通过：dev/test/prod 全部 `Success! The configuration is valid`，零警告 | `evidence/validate.log` |
 | 附加：tflint | 通过：0 issues（内置 terraform 规则集 recommended 预设） | `evidence/tflint.log` |
@@ -114,9 +116,9 @@ terraform 语言规则集，阿里云相关的检查由 `terraform validate`
 - 真实云上 `terraform plan`：本机与 CI 都没有客户云凭证，plan 作业
   只有在客户配好 `dev` 环境 secrets 后才能在 GitHub Actions 里跑通；
   本地只验证了摘要脚本与评论更新逻辑（AC3/AC4）。
-- GitHub Actions 上的整条流水线实跑：已开测试 PR 验证（结果见
-  evidence/ci-smoke-pr.md，如有），其中 plan 作业在配好 secrets 前
-  会失败，属预期行为。
+- GitHub Actions 上的整条流水线实跑：已开测试 PR #2 验证（结果见
+  `evidence/ci-smoke-pr.md`）：fmt、validate ×3、tflint、checkov
+  全部通过；plan 作业在配好 secrets 前快速失败（前置凭证检查），属预期行为。
 - `apply`：本单不执行，流水线里也没有 apply 步骤；prod 不在 CI 里
   plan 或 apply。
 
