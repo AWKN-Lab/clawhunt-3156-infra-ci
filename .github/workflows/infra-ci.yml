@@ -108,6 +108,14 @@ jobs:
       # 注意：dev 环境尚未接共享后端，本步用 -backend=false + -refresh=false
       # 做静态 plan（本地临时 state，不读远端、不写远端）。
       # 接入 OSS 后端后去掉 -refresh=false；prod 永远不在 CI 里 plan。
+      # 前置检查：凭证没配时直接失败退出，不让 provider 在元数据地址上
+      # 长时间重试挂起（实测：无凭证时 plan 步骤卡住 7 分钟以上未返回）。
+      - name: fail fast if dev credentials are missing
+        run: |
+          if [ -z "$ALICLOUD_ACCESS_KEY" ] || [ -z "$ALICLOUD_SECRET_KEY" ]; then
+            echo "::error::dev 环境未配 ALICLOUD_ACCESS_KEY / ALICLOUD_SECRET_KEY，无法 plan。请在仓库 Environment 'dev' 里配最小权限 RAM 子账号的 secrets 后重跑。"
+            exit 1
+          fi
       - name: terraform plan (dev only)
         working-directory: infra/envs/dev
         run: |
