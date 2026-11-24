@@ -6,7 +6,14 @@
 # 同时验证：干净配置里的出站 0.0.0.0/0 不触发自定义规则。
 set -u
 cd "$(dirname "$0")/.."
-CHECKOV="$HOME/workspace/goals/20/hidden_files/clawhunt-hourly-build/3156/.venv/bin/checkov"
+# checkov 路径**可配**：原先写死成编写机的绝对路径 ⇒ 换台机器必然
+# "No such file or directory"，验收 2 直接不成立。现在优先用 $CHECKOV_BIN，
+# 否则用 PATH 里的 checkov；都没有就**明确报错退出**（不静默跳过一次验收）。
+CHECKOV="${CHECKOV_BIN:-$(command -v checkov 2>/dev/null || true)}"
+if [ -z "$CHECKOV" ] || [ ! -x "$CHECKOV" ]; then
+  echo "ERROR：找不到 checkov。请安装后重跑，或用 CHECKOV_BIN=/path/to/checkov 指定。" >&2
+  exit 2
+fi
 LOG="evidence/ac2-checkov.log"
 mkdir -p evidence
 : > "$LOG"

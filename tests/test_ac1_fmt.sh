@@ -4,7 +4,17 @@
 # 格式的 .tf 复制进临时目录跑同样的命令（应失败、退出码非 0）。
 set -u
 cd "$(dirname "$0")/.."
-export PATH="$HOME/workspace/goals/20/hidden_files/clawhunt-hourly-build/tools/bin:$PATH"
+# terraform 路径可配：原先把编写机的 tools/bin 硬塞进 PATH（目录在别的机器上
+# 不存在，等于没设）。现在优先用 $TF_BIN，否则用 PATH 里的 terraform；
+# 都没有就**明确报错退出**（不静默跳过一次验收）。
+if [ -n "${TF_BIN:-}" ]; then
+  export PATH="$(dirname "$TF_BIN"):$PATH"
+fi
+TF="${TF_BIN:-$(command -v terraform 2>/dev/null || true)}"
+if [ -z "$TF" ] || [ ! -x "$TF" ]; then
+  echo "ERROR：找不到 terraform。请安装后重跑，或用 TF_BIN=/path/to/terraform 指定。" >&2
+  exit 2
+fi
 LOG="evidence/ac1-fmt.log"
 mkdir -p evidence
 : > "$LOG"
